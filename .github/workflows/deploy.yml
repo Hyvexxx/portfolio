@@ -36,6 +36,8 @@ jobs:
             astro-
 
       - run: npm ci
+      # Typová kontrola – chyba v obsahu nebo kódu zastaví nasazení dřív, než rozbije web.
+      - run: npm run check
       - run: npm run build
 
       - uses: actions/configure-pages@v6

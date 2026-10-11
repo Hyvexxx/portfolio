@@ -2,7 +2,7 @@
 import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import Arrow from './Arrow.astro';
-import { fullSize, widthsFor } from '../lib/images';
+import { fullSize, placeholder, widthsFor } from '../lib/images';
 import { projectUrl, tagKey, type Project } from '../lib/projects';
 
 interface Props {
@@ -19,16 +19,23 @@ interface Props {
 
 const { image, alt, project, showProject = false, sizes, transitionName } = Astro.props;
 const full = await fullSize(image);
+const ph = await placeholder(image);
 const href = projectUrl(project);
+const style = [
+  transitionName && `view-transition-name: ${transitionName}`,
+  ph && `--ph: ${ph}`,
+]
+  .filter(Boolean)
+  .join('; ');
 ---
 
 <figure
-  class="tile"
+  class="tile fade"
   data-item
   data-category={project.category}
   data-tags={project.tags.map(tagKey).join('|')}
   data-ratio={(image.height / image.width).toFixed(4)}
-  style={transitionName ? `view-transition-name: ${transitionName}` : undefined}
+  style={style || undefined}
 >
   <a
     href={full.src}

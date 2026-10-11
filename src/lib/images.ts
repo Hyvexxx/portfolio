@@ -1,3 +1,4 @@
+import { join } from 'node:path';
 import type { ImageMetadata } from 'astro';
 import { getImage } from 'astro:assets';
 
@@ -18,15 +19,46 @@ function normalize(value: string): string {
   return path.startsWith('/') ? path : `/${path}`;
 }
 
+// Cesta ke zdrojovému souboru každého obrázku – pro výpočet barvy placeholderu.
+const sources = new Map<string, string>();
+
 export function resolveImage(value: string, context: string): ImageMetadata {
-  const mod = modules[normalize(value)];
+  const path = normalize(value);
+  const mod = modules[path];
   if (!mod) {
     throw new Error(
       `Obrázek "${value}" (${context}) nebyl nalezen. Cesta musí vést do src/assets/ ` +
         `a soubor musí být jpg, png, webp nebo avif.`,
     );
   }
+  sources.set(mod.default.src, path);
   return mod.default;
+}
+
+const placeholders = new Map<string, Promise<string | undefined>>();
+
+/** Průměrná barva obrázku (CSS rgb) – zobrazí se, než se obrázek načte. */
+export function placeholder(image: ImageMetadata): Promise<string | undefined> {
+  const path = sources.get(image.src);
+  if (!path) return Promise.resolve(undefined);
+  let color = placeholders.get(path);
+  if (!color) {
+    color = (async () => {
+      try {
+        const { default: sharp } = await import('sharp');
+        const { data } = await sharp(join(process.cwd(), path))
+          .resize(1, 1, { fit: 'fill' })
+          .removeAlpha()
+          .raw()
+          .toBuffer({ resolveWithObject: true });
+        return `rgb(${data[0]} ${data[1]} ${data[2]})`;
+      } catch {
+        return undefined;
+      }
+    })();
+    placeholders.set(path, color);
+  }
+  return color;
 }
 
 /** Šířky pro srcset – jen menší než originál, největší je originál sám. */

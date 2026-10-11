@@ -1,17 +1,22 @@
 ---
 import type { GetStaticPaths } from 'astro';
-import { Image } from 'astro:assets';
+import { getImage, Image } from 'astro:assets';
 import { render } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import Arrow from '../../components/Arrow.astro';
+import JsonLd from '../../components/JsonLd.astro';
 import Lightbox from '../../components/Lightbox.astro';
 import Masonry from '../../components/Masonry.astro';
+import ShareButton from '../../components/ShareButton.astro';
 import Tile from '../../components/Tile.astro';
-import { widthsFor } from '../../lib/images';
+import { placeholder, widthsFor } from '../../lib/images';
 import {
   CATEGORIES,
+  displayUrl,
   getProjects,
+  getSite,
   pad,
+  plainText,
   projectUrl,
   tagKey,
   transitionName,
@@ -29,12 +34,39 @@ export const getStaticPaths = (async () => {
 
 const { project, next } = Astro.props;
 const { Content } = await render(project.entry);
-const description = project.entry.body?.trim().split('\n')[0]?.slice(0, 160);
+const site = await getSite();
+const description = plainText(project.entry.body);
+const nextPh = next ? await placeholder(next.cover) : undefined;
+
+const cover = await getImage({ src: project.cover, width: Math.min(project.cover.width, 1200), format: 'jpg' });
+const schema = {
+  '@type': 'CreativeWork',
+  name: project.title,
+  description: description || undefined,
+  dateCreated: project.date.toISOString().slice(0, 10),
+  genre: CATEGORIES[project.category],
+  keywords: project.tags.join(', ') || undefined,
+  image: new URL(cover.src, Astro.site).href,
+  url: new URL(projectUrl(project), Astro.site).href,
+  locationCreated: project.location ? { '@type': 'Place', name: project.location } : undefined,
+  creator: { '@type': 'Person', name: site.name },
+};
 ---
 
-<Base title={project.title} description={description || undefined} nav="work" image={project.cover}>
+<Base
+  title={project.title}
+  description={description || undefined}
+  nav="work"
+  image={project.cover}
+  imageAlt={project.title}
+>
+  <JsonLd slot="head" data={schema} />
+
   <article class="wrap">
-    <a class="back" href={url('/')}><Arrow direction="left" /> Všechny projekty</a>
+    <div class="project-top">
+      <a class="pill pill--back" href={url('/')}><Arrow direction="left" /> Všechny projekty</a>
+      <ShareButton title={project.title} />
+    </div>
 
     <header class="project-hero">
       <p class="label"><span class="dot"></span>{CATEGORIES[project.category]} — {project.year}</p>
@@ -55,6 +87,35 @@ const description = project.entry.body?.trim().split('\n')[0]?.slice(0, 160);
           <dt class="label">Obrázky</dt>
           <dd>{pad(project.images.length)}</dd>
         </div>
+        {
+          project.client && (
+            <div>
+              <dt class="label">Klient</dt>
+              <dd>{project.client}</dd>
+            </div>
+          )
+        }
+        {
+          project.location && (
+            <div>
+              <dt class="label">Místo</dt>
+              <dd>{project.location}</dd>
+            </div>
+          )
+        }
+        {
+          project.link && (
+            <div>
+              <dt class="label">Odkaz</dt>
+              <dd>
+                <a href={project.link} target="_blank" rel="noopener">
+                  <span>{displayUrl(project.link)}</span>
+                  <Arrow />
+                </a>
+              </dd>
+            </div>
+          )
+        }
         {
           project.tags.length > 0 && (
             <div class="facts-wide">
@@ -98,7 +159,7 @@ const description = project.entry.body?.trim().split('\n')[0]?.slice(0, 160);
               {next.title} <Arrow direction="right" />
             </p>
           </div>
-          <div class="next-media">
+          <div class="next-media fade" style={nextPh ? `--ph: ${nextPh}` : undefined}>
             <Image
               src={next.cover}
               alt=""

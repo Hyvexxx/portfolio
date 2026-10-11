@@ -13,6 +13,9 @@ gallery:
   - /src/assets/projects/ukazka-zrnko/03.jpg
   - /src/assets/projects/ukazka-zrnko/04.jpg
   - /src/assets/projects/ukazka-zrnko/05.jpg
+client: Kavárna Zrnko
+location: Brno
+link: https://www.behance.net/
 featured: false
 draft: false
 ---

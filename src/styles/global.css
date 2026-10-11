@@ -1,18 +1,22 @@
 /* =========================================================
    Design tokeny
    ========================================================= */
+/* Barvy jsou light-dark(světlá, tmavá). Motiv se řídí systémem, nebo
+   přepínačem v hlavičce, který nastaví data-theme na <html>. */
 :root {
-  --bg: #ffffff;
-  --bg-soft: #f4f4f3;
-  --fg: #0b0b0c;
-  --fg-2: #3a3a40;
-  --muted: #74747c;
-  --line: #e9e9e7;
-  --accent: #2b59ff;
-  --glass: rgb(255 255 255 / 0.74);
-  --seg-active: #ffffff;
-  --seg-shadow: 0 1px 2px rgb(0 0 0 / 0.06), 0 2px 10px rgb(0 0 0 / 0.06);
-  --footer-bg: #0b0b0c;
+  --bg: light-dark(#ffffff, #0a0a0b);
+  --bg-soft: light-dark(#f4f4f3, #151517);
+  --fg: light-dark(#0b0b0c, #f4f4f5);
+  --fg-2: light-dark(#3a3a40, #cfcfd4);
+  --muted: light-dark(#74747c, #8b8b94);
+  --line: light-dark(#e9e9e7, #232326);
+  --accent: light-dark(#2b59ff, #7b93ff);
+  --glass: light-dark(rgb(255 255 255 / 0.74), rgb(14 14 16 / 0.72));
+  --seg-active: light-dark(#ffffff, #26262a);
+  --seg-shadow:
+    0 1px 2px light-dark(rgb(0 0 0 / 0.06), rgb(0 0 0 / 0.4)),
+    0 2px 10px light-dark(rgb(0 0 0 / 0.06), rgb(0 0 0 / 0));
+  --footer-bg: light-dark(#0b0b0c, #151517);
   --footer-fg: #f4f4f5;
   --footer-muted: #8d8d95;
 
@@ -29,20 +33,12 @@
   color-scheme: light dark;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0a0a0b;
-    --bg-soft: #151517;
-    --fg: #f4f4f5;
-    --fg-2: #cfcfd4;
-    --muted: #8b8b94;
-    --line: #232326;
-    --accent: #7b93ff;
-    --glass: rgb(14 14 16 / 0.72);
-    --seg-active: #26262a;
-    --seg-shadow: 0 1px 2px rgb(0 0 0 / 0.4);
-    --footer-bg: #151517;
-  }
+:root[data-theme='light'] {
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
 /* =========================================================
@@ -114,6 +110,46 @@ h3 {
   letter-spacing: -0.03em;
   line-height: 1.05;
   text-wrap: balance;
+}
+
+p {
+  text-wrap: pretty;
+}
+
+.skip-link {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: var(--fg);
+  color: var(--bg);
+  font-weight: 500;
+  text-decoration: none;
+  transform: translateY(-150%);
+  transition: transform 0.3s var(--ease);
+}
+
+.skip-link:focus {
+  transform: none;
+}
+
+main:focus {
+  outline: none;
+}
+
+/* Obrázky se po načtení jemně objeví; do té doby je vidět jejich průměrná
+   barva (--ph). Bez JS (chybí třída .js) se nic neskrývá. */
+.js .fade img {
+  opacity: 0;
+  transition:
+    opacity 0.7s var(--ease),
+    transform 1.2s var(--ease);
+}
+
+.js .fade img.is-loaded {
+  opacity: 1;
 }
 
 ::selection {
@@ -253,6 +289,57 @@ h3 {
 
 .btn:hover .arrow {
   transform: translate(2px, -2px);
+}
+
+.theme-toggle {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    color 0.2s,
+    background-color 0.2s;
+}
+
+.theme-toggle:hover {
+  background: var(--bg-soft);
+  color: var(--fg);
+}
+
+.theme-toggle svg {
+  width: 18px;
+  height: 18px;
+  transition: transform 0.6s var(--ease);
+}
+
+.theme-toggle:hover svg {
+  transform: rotate(20deg);
+}
+
+/* Ve světlém režimu ukazuje měsíc (přepni na tmavý), v tmavém slunce. */
+.theme-toggle .sun,
+:root[data-theme='dark'] .theme-toggle .moon {
+  display: none;
+}
+
+:root[data-theme='dark'] .theme-toggle .sun {
+  display: block;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) .theme-toggle .sun {
+    display: block;
+  }
+
+  :root:not([data-theme='light']) .theme-toggle .moon {
+    display: none;
+  }
 }
 
 @media (max-width: 480px) {
@@ -496,7 +583,7 @@ h3 {
   overflow: hidden;
   isolation: isolate;
   border-radius: var(--r-lg);
-  background: var(--bg-soft);
+  background: var(--ph, var(--bg-soft));
 }
 
 .card-media img {
@@ -529,6 +616,26 @@ h3 {
   font-size: 0.7rem;
   letter-spacing: 0.03em;
   text-transform: uppercase;
+}
+
+.card-badge--featured {
+  top: 12px;
+  bottom: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #fff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.card-badge--featured::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
 }
 
 .card-arrow {
@@ -610,7 +717,7 @@ h3 {
   overflow: hidden;
   isolation: isolate;
   border-radius: var(--r);
-  background: var(--bg-soft);
+  background: var(--ph, var(--bg-soft));
 }
 
 .masonry.is-grid .tile {
@@ -678,26 +785,49 @@ h3 {
 /* =========================================================
    Detail projektu
    ========================================================= */
-.back {
+.project-top {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 8px;
+}
+
+.pill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
   padding: 7px 14px 7px 11px;
   border: 1px solid var(--line);
   border-radius: 999px;
+  background: transparent;
   color: var(--fg-2);
+  font: inherit;
   font-size: 0.875rem;
   text-decoration: none;
-  transition: border-color 0.2s;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    color 0.2s;
 }
 
-.back:hover {
+.pill:hover {
   border-color: var(--fg);
+  color: var(--fg);
 }
 
-.back:hover .arrow {
+.pill--back:hover .arrow {
   transform: translateX(-3px);
+}
+
+.pill--share:hover .arrow {
+  transform: translate(2px, -2px);
+}
+
+.pill[data-done] {
+  border-color: var(--accent);
+  color: var(--accent);
 }
 
 .project-hero {
@@ -750,6 +880,30 @@ h3 {
   grid-column: 1 / -1;
 }
 
+.facts a {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.facts a:not(.chip):hover {
+  color: var(--accent);
+}
+
+.facts a:not(.chip) span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.facts a:hover .arrow {
+  transform: translate(2px, -2px);
+}
+
 .prose {
   max-width: 62ch;
   color: var(--fg-2);
@@ -773,6 +927,41 @@ h3 {
 .prose strong {
   color: var(--fg);
   font-weight: 600;
+}
+
+.prose :is(h2, h3, h4) {
+  margin-top: 1.6em;
+  color: var(--fg);
+  font-size: 1.15em;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.prose :is(ul, ol) {
+  padding-left: 1.2em;
+}
+
+.prose li + li {
+  margin-top: 0.3em;
+}
+
+.prose li::marker {
+  color: var(--muted);
+}
+
+.prose blockquote {
+  padding-left: 1em;
+  border-left: 2px solid var(--accent);
+  color: var(--fg);
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--line);
+}
+
+.prose a:hover {
+  color: var(--accent);
 }
 
 .next-project {
@@ -814,7 +1003,7 @@ h3 {
   overflow: hidden;
   isolation: isolate;
   border-radius: var(--r-lg);
-  background: var(--bg-soft);
+  background: var(--ph, var(--bg-soft));
 }
 
 .next-media img {
@@ -849,12 +1038,18 @@ h3 {
   }
 }
 
+.about-media {
+  overflow: hidden;
+  border-radius: var(--r-lg);
+  background: var(--ph, var(--bg-soft));
+}
+
 .about-portrait {
   aspect-ratio: 4 / 5;
   width: 100%;
   object-fit: cover;
   border-radius: var(--r-lg);
-  background: var(--bg-soft);
+  background: var(--ph, var(--bg-soft));
 }
 
 .about-title {

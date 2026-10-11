@@ -1,12 +1,19 @@
 ---
 interface Props {
   large?: boolean;
+  /** Dlaždice mají popisky s názvem projektu – lightbox pro ně nechá místo. */
+  captions?: boolean;
 }
 
-const { large = false } = Astro.props;
+const { large = false, captions = false } = Astro.props;
 ---
 
-<div class:list={['masonry', { 'masonry--large': large }]} data-gallery data-masonry>
+<div
+  class:list={['masonry', { 'masonry--large': large }]}
+  data-gallery
+  data-masonry
+  data-captions={captions || undefined}
+>
   <slot />
 </div>
 

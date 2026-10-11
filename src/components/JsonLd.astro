@@ -1,0 +1,12 @@
+---
+// Strukturovaná data (schema.org) pro vyhledávače.
+interface Props {
+  data: Record<string, unknown>;
+}
+
+const { data } = Astro.props;
+// "<" escapujeme, aby text z CMS nemohl ukončit <script>.
+const json = JSON.stringify({ '@context': 'https://schema.org', ...data }).replace(/</g, '\\u003c');
+---
+
+<script type="application/ld+json" is:inline set:html={json} />

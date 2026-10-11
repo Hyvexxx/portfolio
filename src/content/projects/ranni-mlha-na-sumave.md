@@ -13,6 +13,7 @@ gallery:
   - /src/assets/projects/ukazka-sumava/05.jpg
   - /src/assets/projects/ukazka-sumava/06.jpg
   - /src/assets/projects/ukazka-sumava/07.jpg
+location: Modrava, Šumava
 featured: true
 draft: false
 ---

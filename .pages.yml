@@ -65,6 +65,18 @@ content:
           path: src/assets/projects
           multiple: true
           unique: true
+      - name: client
+        label: Klient
+        description: Nepovinné – pro koho projekt vznikl.
+        type: string
+      - name: location
+        label: Místo
+        description: Nepovinné – např. Praha, Šumava.
+        type: string
+      - name: link
+        label: Odkaz
+        description: Nepovinné – web klienta, Behance projektu apod.
+        type: string
       - name: featured
         label: Zvýraznit
         description: Zvýrazněné projekty jsou na webu vždy první.
@@ -108,12 +120,20 @@ content:
       - name: email
         label: E-mail
         type: string
-      - name: instagram
-        label: Instagram (celý odkaz)
-        type: string
-      - name: behance
-        label: Behance (celý odkaz)
-        type: string
+      - name: socials
+        label: Sítě a odkazy
+        description: Zobrazí se v patičce a na stránce O mně (Instagram, Behance, LinkedIn…).
+        type: object
+        list: true
+        fields:
+          - name: name
+            label: Název
+            type: string
+            required: true
+          - name: url
+            label: Odkaz
+            type: string
+            required: true
       - name: portrait
         label: Portrét
         type: image

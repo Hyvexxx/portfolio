@@ -12,6 +12,18 @@ const optionalText = z
   .string()
   .nullish()
   .transform((v) => v?.trim() || undefined);
+// Odkaz bez protokolu ("instagram.com/jmeno") doplníme na https://.
+const withProtocol = (v: string) => (/^[a-z][a-z0-9+.-]*:/i.test(v) ? v : `https://${v}`);
+const optionalUrl = optionalText.transform((v) => (v ? withProtocol(v) : undefined));
+const socials = z.preprocess(
+  (v) => (Array.isArray(v) ? v.filter((s) => s?.name?.trim() && s?.url?.trim()) : []),
+  z.array(
+    z.object({
+      name: z.string().trim(),
+      url: z.string().trim().transform(withProtocol),
+    }),
+  ),
+);
 
 const projects = defineCollection({
   loader: glob({ base: './src/content/projects', pattern: '**/*.md' }),
@@ -23,6 +35,9 @@ const projects = defineCollection({
     // Cesty k obrázkům v src/assets/…, převádí je src/lib/images.ts
     cover: z.string().min(1),
     gallery: list,
+    client: optionalText,
+    location: optionalText,
+    link: optionalUrl,
     featured: flag,
     draft: flag,
   }),
@@ -36,8 +51,7 @@ const site = defineCollection({
     intro: optionalText,
     cta: optionalText,
     email: optionalText,
-    instagram: optionalText,
-    behance: optionalText,
+    socials,
     portrait: optionalText,
   }),
 });

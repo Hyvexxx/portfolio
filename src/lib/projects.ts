@@ -1,4 +1,5 @@
 import type { ImageMetadata } from 'astro';
+import { getImage } from 'astro:assets';
 import { getCollection, getEntry, type CollectionEntry } from 'astro:content';
 import { resolveImage } from './images';
 
@@ -16,6 +17,9 @@ export interface Project {
   year: number;
   category: Category;
   tags: string[];
+  client?: string;
+  location?: string;
+  link?: string;
   featured: boolean;
   cover: ImageMetadata;
   /** Všechny obrázky projektu – cover první, bez duplicit. */
@@ -55,9 +59,13 @@ function toProject(entry: CollectionEntry<'projects'>): Project {
     id: entry.id,
     title: data.title,
     date: data.date,
-    year: data.date.getFullYear(),
+    // Datum "2026-01-01" je půlnoc UTC – getFullYear() by v zóně západně od UTC vrátil 2025.
+    year: data.date.getUTCFullYear(),
     category: data.category,
     tags,
+    client: data.client,
+    location: data.location,
+    link: data.link,
     featured: data.featured,
     cover,
     images,
@@ -121,6 +129,24 @@ export async function getSite() {
   };
 }
 
+export type Site = Awaited<ReturnType<typeof getSite>>;
+
+/** schema.org Person pro úvodní stránku a O mně. */
+export async function personSchema(site: Site, origin: URL | undefined) {
+  const portrait = site.portrait
+    ? await getImage({ src: site.portrait, width: Math.min(site.portrait.width, 800), format: 'jpg' })
+    : undefined;
+  return {
+    '@type': 'Person',
+    name: site.name,
+    description: site.tagline,
+    url: new URL(url('/'), origin).href,
+    email: site.email ? `mailto:${site.email}` : undefined,
+    image: portrait ? new URL(portrait.src, origin).href : undefined,
+    sameAs: site.socials.map((s) => s.url),
+  };
+}
+
 const base = import.meta.env.BASE_URL.replace(/\/$/, '');
 
 /** Odkaz v rámci webu s ohledem na `base` z astro.config.mjs. */
@@ -133,6 +159,23 @@ export const projectUrl = (project: Project) => url(`/projekty/${project.id}/`);
 /** Název pro view transition – cover se při přechodu „přelije“ z karty do detailu. */
 export const transitionName = (project: Project) =>
   `cover-${project.id.replace(/[^a-zA-Z0-9_-]/g, '-')}`;
+
+/** Markdown → prostý text pro meta description (bez **, odkazů, nadpisů…). */
+export function plainText(markdown: string | undefined, max = 160): string {
+  const text = (markdown ?? '')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/<[^>]+>/g, '')
+    .replace(/^\s{0,3}(#{1,6}|>|[-*+]|\d+\.)\s+/gm, '')
+    .replace(/[*_`~]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+  return text.length > max ? `${text.slice(0, max - 1).trimEnd()}…` : text;
+}
+
+/** "https://www.instagram.com/jmeno/" → "instagram.com/jmeno" */
+export const displayUrl = (link: string) =>
+  link.replace(/^[a-z]+:\/\/(www\.)?/i, '').replace(/^mailto:/, '').replace(/\/$/, '');
 
 /** 4 → "04" */
 export const pad = (n: number) => String(n).padStart(2, '0');

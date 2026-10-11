@@ -6,13 +6,16 @@
   import PhotoSwipeLightbox from 'photoswipe/lightbox';
   import 'photoswipe/style.css';
 
+  // Místo dole pro popisek jen tam, kde popisky jsou (Všechny práce).
+  const captions = document.querySelector('[data-gallery][data-captions]') !== null;
+
   const lightbox = new PhotoSwipeLightbox({
     gallery: '[data-gallery]',
     // Jen viditelné položky – lightbox respektuje aktivní filtry.
     children: '[data-item]:not([hidden]) a[data-pswp-width]',
     pswpModule: () => import('photoswipe'),
     bgOpacity: 0.97,
-    padding: { top: 24, bottom: 72, left: 0, right: 0 },
+    padding: { top: 24, bottom: captions ? 72 : 24, left: 0, right: 0 },
     wheelToZoom: false,
     closeTitle: 'Zavřít',
     zoomTitle: 'Přiblížit',

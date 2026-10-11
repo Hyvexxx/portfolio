@@ -1,0 +1,53 @@
+---
+// Přepínač světlého/tmavého režimu. Výchozí motiv určuje systém; volba se
+// uloží do localStorage a inline skript v <head> (Base.astro) ji použije
+// ještě před vykreslením, aby stránka při načtení neblikla.
+---
+
+<button class="theme-toggle" type="button" aria-label="Přepnout světlý / tmavý režim" data-theme-toggle>
+  <svg class="moon" viewBox="0 0 24 24" aria-hidden="true">
+    <path
+      d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5Z"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linejoin="round"></path>
+  </svg>
+  <svg class="sun" viewBox="0 0 24 24" aria-hidden="true">
+    <circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.6"></circle>
+    <path
+      d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.6"
+      stroke-linecap="round"></path>
+  </svg>
+</button>
+
+<script>
+  const root = document.documentElement;
+  const media = matchMedia('(prefers-color-scheme: dark)');
+  const isDark = () => (root.dataset.theme ? root.dataset.theme === 'dark' : media.matches);
+
+  const syncThemeColor = () => {
+    const color = getComputedStyle(document.body).backgroundColor;
+    document
+      .querySelectorAll<HTMLMetaElement>('meta[name="theme-color"]')
+      .forEach((meta) => (meta.content = color));
+  };
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]')) {
+    button.addEventListener('click', () => {
+      const theme = isDark() ? 'light' : 'dark';
+      root.dataset.theme = theme;
+      try {
+        localStorage.setItem('theme', theme);
+      } catch {
+        // soukromé okno nebo zakázané úložiště – volba platí jen do reloadu
+      }
+      syncThemeColor();
+    });
+  }
+
+  if (root.dataset.theme) syncThemeColor();
+</script>

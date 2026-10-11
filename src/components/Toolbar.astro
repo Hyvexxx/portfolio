@@ -60,11 +60,14 @@ const { view, tags } = Astro.props;
   const viewLinks = document.querySelectorAll<HTMLAnchorElement>('[data-view-link]');
   const empty = document.querySelector<HTMLElement>('[data-empty]');
 
+  // Hodnoty z URL bereme jen tehdy, když pro ně existuje filtr –
+  // starý nebo překlepnutý odkaz (?kategorie=xyz) nesmí schovat všechno.
   const params = new URLSearchParams(location.search);
-  const state: Record<Key, string> = {
-    category: params.get(PARAM.category) ?? '',
-    tag: params.get(PARAM.tag) ?? '',
+  const valid = (key: Key) => {
+    const value = params.get(PARAM[key]) ?? '';
+    return chips.some((c) => c.dataset.filter === key && c.dataset.value === value) ? value : '';
   };
+  const state: Record<Key, string> = { category: valid('category'), tag: valid('tag') };
 
   const tagsOf = (el: HTMLElement) => (el.dataset.tags ? el.dataset.tags.split('|') : []);
   const matches = (el: HTMLElement, category: string, tag: string) =>

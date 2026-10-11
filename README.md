@@ -6,7 +6,11 @@ Statický web s fotografiemi a grafikou: [Astro](https://astro.build) + [Pages C
 - **Dva pohledy** – *Projekty* (karty) a *Všechny práce* (všechny obrázky v jedné mřížce).
 - **Filtry** – Fotografie / Grafika a tagy, fungují v obou pohledech a dají se sdílet odkazem.
 - **Lightbox** – zvětšení obrázku, šipky, swipe na mobilu.
-- Obrázky se při buildu automaticky zmenšují a převádějí do WebP.
+- **Světlý / tmavý režim** – podle systému, nebo ručně přepínačem v hlavičce.
+- **Sdílení** projektu (na mobilu systémové sdílení, jinak kopírování odkazu).
+- Obrázky se při buildu automaticky zmenšují a převádějí do WebP; než se načtou,
+  ukazuje se jejich průměrná barva.
+- SEO: sitemap, `robots.txt`, Open Graph náhledy a strukturovaná data (schema.org).
 
 ## Jednorázové nastavení
 
@@ -24,11 +28,16 @@ Statický web s fotografiemi a grafikou: [Astro](https://astro.build) + [Pages C
    (např. `svatba-anna-petr`), nahraj do ní fotky a jednu vyber jako cover.
 4. **Galerie:** vyber všechny fotky projektu (jde jich vybrat víc najednou),
    pořadí změníš přetažením.
-5. Ulož. GitHub Action web za 1–3 minuty přebuilduje a projekt se objeví.
+5. Volitelně vyplň **Klient**, **Místo** a **Odkaz** – zobrazí se mezi údaji projektu.
+6. Ulož. GitHub Action web za 1–3 minuty přebuilduje a projekt se objeví.
 
-Projekt jde schovat zaškrtnutím **Koncept**, nebo připíchnout nahoru přes **Zvýraznit**.
-Jméno, nadpis úvodní stránky, krátké představení, výzvu v patičce, kontakty a portrét
-upravíš v sekci **O mně**.
+Projekt jde schovat zaškrtnutím **Koncept**, nebo připíchnout nahoru přes **Zvýraznit**
+(dostane štítek „Vybrané“).
+Jméno, nadpis úvodní stránky, krátké představení, výzvu v patičce, e-mail, portrét
+a **sítě a odkazy** (Instagram, Behance, LinkedIn… – libovolný počet) upravíš v sekci **O mně**.
+
+Před každým nasazením proběhne typová kontrola – když je v obsahu chyba
+(např. chybějící obrázek), nasazení se zastaví a v záložce *Actions* uvidíš proč.
 
 > Ukázkové projekty (obrázky s nápisem „UKÁZKA“) smaž, až přidáš vlastní:
 > `src/content/projects/*.md` a složky `src/assets/projects/ukazka-*`.

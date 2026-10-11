@@ -3,25 +3,27 @@ import { Image } from 'astro:assets';
 import { render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import Arrow from '../components/Arrow.astro';
-import { widthsFor } from '../lib/images';
-import { getSite } from '../lib/projects';
+import JsonLd from '../components/JsonLd.astro';
+import { placeholder, widthsFor } from '../lib/images';
+import { displayUrl, getSite, personSchema } from '../lib/projects';
 
 const site = await getSite();
 const { Content } = await render(site.entry);
-const handle = (link: string) => link.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+const ph = site.portrait ? await placeholder(site.portrait) : undefined;
 
 const links = [
-  site.email && { label: 'E-mail', text: site.email, href: `mailto:${site.email}` },
-  site.instagram && { label: 'Instagram', text: handle(site.instagram), href: site.instagram },
-  site.behance && { label: 'Behance', text: handle(site.behance), href: site.behance },
-].filter((link) => !!link);
+  ...(site.email ? [{ label: 'E-mail', text: site.email, href: `mailto:${site.email}`, me: false }] : []),
+  ...site.socials.map((s) => ({ label: s.name, text: displayUrl(s.url), href: s.url, me: true })),
+];
 ---
 
-<Base title="O mně" nav="about">
+<Base title="O mně" nav="about" imageAlt={site.name}>
+  <JsonLd slot="head" data={await personSchema(site, Astro.site)} />
+
   <section class="wrap about">
     {
       site.portrait && (
-        <div class="about-media">
+        <div class="about-media fade" style={ph ? `--ph: ${ph}` : undefined}>
           <Image
             class="about-portrait"
             src={site.portrait}
@@ -46,7 +48,7 @@ const links = [
           <ul class="links">
             {links.map((link) => (
               <li>
-                <a href={link.href} rel={link.href.startsWith('mailto:') ? undefined : 'me'}>
+                <a href={link.href} rel={link.me ? 'me' : undefined}>
                   <span class="label">{link.label}</span>
                   <span>{link.text}</span>
                   <Arrow />

@@ -1,8 +1,16 @@
 ---
 import Base from '../layouts/Base.astro';
+import JsonLd from '../components/JsonLd.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import Toolbar from '../components/Toolbar.astro';
-import { getAllImages, getProjects, getSite, getTags, pad } from '../lib/projects';
+import {
+  getAllImages,
+  getProjects,
+  getSite,
+  getTags,
+  pad,
+  personSchema,
+} from '../lib/projects';
 
 const projects = await getProjects();
 const site = await getSite();
@@ -13,7 +21,9 @@ const range = projects.length ? (from === to ? `${from}` : `${from}–${to}`) : 
 const categories = new Set(projects.map((p) => p.category)).size;
 ---
 
-<Base nav="work" image={projects[0]?.cover}>
+<Base nav="work" image={projects[0]?.cover} imageAlt={projects[0]?.title}>
+  <JsonLd slot="head" data={await personSchema(site, Astro.site)} />
+
   <section class="wrap hero">
     <p class="label"><span class="dot"></span>Portfolio {range}</p>
     <h1 class="hero-title">{site.tagline ?? site.name}</h1>

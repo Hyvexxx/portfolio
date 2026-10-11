@@ -10,7 +10,7 @@ const projects = await getProjects();
 const images = getAllImages(projects);
 ---
 
-<Base title="Všechny práce" nav="work" image={projects[0]?.cover}>
+<Base title="Všechny práce" nav="work" image={projects[0]?.cover} imageAlt={projects[0]?.title}>
   <section class="wrap hero">
     <p class="label"><span class="dot"></span>Archiv</p>
     <h1 class="hero-title">Všechny práce</h1>
@@ -24,7 +24,7 @@ const images = getAllImages(projects);
   <Toolbar view="all" tags={getTags(projects)} />
 
   <section class="wrap" aria-label="Všechny obrázky">
-    <Masonry>
+    <Masonry captions>
       {
         images.map(({ image, alt, project }) => (
           <Tile
