@@ -56,4 +56,33 @@ const site = defineCollection({
   }),
 });
 
-export const collections = { projects, site };
+const flagOn = z.boolean().nullish().transform((v) => v ?? true);
+const orDefault = <T extends string>(values: [T, ...T[]], fallback: T) =>
+  z
+    .enum(values)
+    .nullish()
+    .catch(fallback)
+    .transform((v) => v ?? fallback);
+
+const settings = defineCollection({
+  loader: glob({ base: './src/content/settings', pattern: '*.md' }),
+  schema: z.object({
+    watermark: z.preprocess(
+      (v) => v ?? {},
+      z.object({
+        enabled: flagOn,
+        text: optionalText,
+        position: orDefault(['corner', 'center', 'tiled'], 'corner'),
+        opacity: z.preprocess(
+          (v) => (v === '' || v == null ? undefined : Number(v)),
+          z.number().min(5).max(100).optional().catch(undefined).transform((v) => v ?? 55),
+        ),
+        size: orDefault(['small', 'medium', 'large'], 'medium'),
+      }),
+    ),
+    protectImages: flagOn,
+    blockAi: flagOn,
+  }),
+});
+
+export const collections = { projects, site, settings };

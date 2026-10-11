@@ -6,7 +6,7 @@ import type { ImageMetadata } from 'astro';
 import { getImage } from 'astro:assets';
 import Arrow from '../components/Arrow.astro';
 import ThemeToggle from '../components/ThemeToggle.astro';
-import { getSite, url } from '../lib/projects';
+import { getSettings, getSite, url } from '../lib/projects';
 
 interface Props {
   title?: string;
@@ -18,6 +18,7 @@ interface Props {
 
 const { title, description, image, imageAlt, nav } = Astro.props;
 const site = await getSite();
+const settings = await getSettings();
 
 const pageTitle = title
   ? `${title} — ${site.name}`
@@ -44,7 +45,7 @@ const year = new Date().getFullYear();
 ---
 
 <!doctype html>
-<html lang="cs">
+<html lang="cs" data-protect={settings.protectImages || undefined}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -59,6 +60,7 @@ const year = new Date().getFullYear();
     <title>{pageTitle}</title>
     {pageDescription && <meta name="description" content={pageDescription} />}
     <link rel="canonical" href={canonical} />
+    {settings.blockAi && <meta name="robots" content="noai, noimageai" />}
     <link rel="icon" type="image/svg+xml" href={url('/favicon.svg')} />
     <link rel="apple-touch-icon" href={url('/apple-touch-icon.png')} />
     <link rel="sitemap" href={url('/sitemap-index.xml')} />
@@ -118,7 +120,9 @@ const year = new Date().getFullYear();
           )
         }
         <div class="footer-bottom">
-          <p>© {year} {site.name}</p>
+          <p>
+            © {year} {site.name}{settings.protectImages && ' · Všechna práva vyhrazena'}
+          </p>
           <ul>
             {
               site.socials.map((social) => (
@@ -149,6 +153,18 @@ const year = new Date().getFullYear();
           img.addEventListener('load', () => reveal(img), { once: true });
           img.addEventListener('error', () => reveal(img), { once: true });
         }
+      }
+
+      // Ochrana fotek: bez pravého tlačítka a přetahování nad obrázky.
+      // Stoprocentní ochrana na webu neexistuje, ale běžné stažení to odradí.
+      if (document.documentElement.hasAttribute('data-protect')) {
+        const block = (event: Event) => {
+          if (event.target instanceof Element && event.target.closest('img, .pswp')) {
+            event.preventDefault();
+          }
+        };
+        document.addEventListener('contextmenu', block);
+        document.addEventListener('dragstart', block);
       }
     </script>
   </body>

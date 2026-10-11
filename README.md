@@ -11,6 +11,18 @@ Statický web s fotografiemi a grafikou: [Astro](https://astro.build) + [Pages C
 - Obrázky se při buildu automaticky zmenšují a převádějí do WebP; než se načtou,
   ukazuje se jejich průměrná barva.
 - SEO: sitemap, `robots.txt`, Open Graph náhledy a strukturovaná data (schema.org).
+- **Ochrana fotek** – vodoznak vypálený přímo do obrázků, copyright v metadatech,
+  vypnuté pravé tlačítko nad fotkami a zákaz AI robotů. Vše se nastavuje
+  v Pages CMS → **Nastavení webu**.
+
+## Vodoznak
+
+V Pages CMS → **Nastavení webu → Vodoznak** nastavíš text (prázdné = „© Tvoje jméno“),
+umístění (vpravo dole / uprostřed / přes celou fotku), krytí a velikost.
+Vodoznak je ve fotkách v galeriích a ve zvětšeném náhledu; karty projektů na úvodní
+stránce zůstávají čisté. Po změně nastavení se při dalším nasazení všechny fotky
+přegenerují samy. Originály v repu vodoznak nemají – proto nenahrávej plné rozlišení
+(viz níže).
 
 ## Jednorázové nastavení
 

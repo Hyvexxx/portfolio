@@ -94,6 +94,69 @@ content:
           format: markdown
           media: false
 
+  - name: settings
+    label: Nastavení webu
+    description: Vodoznak a ochrana fotek.
+    type: file
+    path: src/content/settings/web.md
+    format: yaml-frontmatter
+    fields:
+      - name: watermark
+        label: Vodoznak
+        description: Vypálí se do fotek v galeriích a ve zvětšeném náhledu. Karty projektů zůstávají čisté.
+        type: object
+        fields:
+          - name: enabled
+            label: Zapnout vodoznak
+            type: boolean
+            default: true
+          - name: text
+            label: Text
+            description: Když necháš prázdné, použije se „© Tvoje jméno“.
+            type: string
+          - name: position
+            label: Umístění
+            type: select
+            default: corner
+            options:
+              values:
+                - name: corner
+                  label: Vpravo dole
+                - name: center
+                  label: Uprostřed
+                - name: tiled
+                  label: Přes celou fotku (opakovaně)
+          - name: opacity
+            label: Krytí (%)
+            description: 5 = skoro neviditelný, 100 = plně bílý. Doporučeno 40–60.
+            type: number
+            default: 55
+            options:
+              min: 5
+              max: 100
+          - name: size
+            label: Velikost
+            type: select
+            default: medium
+            options:
+              values:
+                - name: small
+                  label: Malý
+                - name: medium
+                  label: Střední
+                - name: large
+                  label: Velký
+      - name: protectImages
+        label: Ochrana fotek
+        description: Vypne pravé tlačítko a přetahování obrázků. Stoprocentní ochrana neexistuje, ale běžné stahování to odradí.
+        type: boolean
+        default: true
+      - name: blockAi
+        label: Zakázat AI roboty
+        description: Požádá roboty, kteří sbírají obrázky pro trénink AI, aby web neprocházeli. Google a Seznam dál fungují.
+        type: boolean
+        default: true
+
   - name: about
     label: O mně
     type: file

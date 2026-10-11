@@ -131,6 +131,32 @@ export async function getSite() {
 
 export type Site = Awaited<ReturnType<typeof getSite>>;
 
+const DEFAULT_SETTINGS: CollectionEntry<'settings'>['data'] = {
+  watermark: { enabled: true, text: undefined, position: 'corner', opacity: 55, size: 'medium' },
+  protectImages: true,
+  blockAi: true,
+};
+
+/** Nastavení webu z Pages CMS (src/content/settings/web.md). */
+export async function getSettings() {
+  return (await getEntry('settings', 'web'))?.data ?? DEFAULT_SETTINGS;
+}
+
+/**
+ * Nastavení vodoznaku jako řetězec pro image service (watermark-service.ts).
+ * Je součástí hashe obrázku, takže změna textu nebo pozice obrázky přegeneruje.
+ */
+export async function getWatermark(): Promise<string | undefined> {
+  const [{ watermark }, site] = await Promise.all([getSettings(), getSite()]);
+  if (!watermark.enabled) return undefined;
+  return JSON.stringify({
+    text: watermark.text ?? `© ${site.name}`,
+    position: watermark.position,
+    opacity: watermark.opacity,
+    size: watermark.size,
+  });
+}
+
 /** schema.org Person pro úvodní stránku a O mně. */
 export async function personSchema(site: Site, origin: URL | undefined) {
   const portrait = site.portrait

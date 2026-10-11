@@ -11,5 +11,9 @@ export default defineConfig({
   // uložit mezi buildy (npm ci node_modules maže).
   cacheDir: './.astro-cache',
   compressHTML: true,
+  // Sharp + vodoznak (nastavuje se v Pages CMS → Nastavení webu).
+  image: {
+    service: { entrypoint: './src/lib/watermark-service.ts' },
+  },
   integrations: [sitemap()],
 });

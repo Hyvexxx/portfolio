@@ -75,9 +75,9 @@ export interface FullImage {
 }
 
 // Velká verze pro lightbox – nikdy ne větší než originál.
-export async function fullSize(image: ImageMetadata): Promise<FullImage> {
+export async function fullSize(image: ImageMetadata, watermark?: string): Promise<FullImage> {
   const width = Math.min(image.width, 2400);
-  const result = await getImage({ src: image, width, format: 'webp', quality: 85 });
+  const result = await getImage({ src: image, width, format: 'webp', quality: 85, watermark });
   return {
     src: result.src,
     width,

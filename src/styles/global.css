@@ -139,6 +139,13 @@ main:focus {
   outline: none;
 }
 
+[data-protect] img,
+[data-protect] .pswp__img {
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+  user-select: none;
+}
+
 /* Obrázky se po načtení jemně objeví; do té doby je vidět jejich průměrná
    barva (--ph). Bez JS (chybí třída .js) se nic neskrývá. */
 .js .fade img {
