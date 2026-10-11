@@ -1,0 +1,49 @@
+---
+import Base from '../layouts/Base.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Toolbar from '../components/Toolbar.astro';
+import { getAllImages, getProjects, getSite, getTags, pad } from '../lib/projects';
+
+const projects = await getProjects();
+const site = await getSite();
+const years = projects.map((p) => p.year);
+const from = Math.min(...years);
+const to = Math.max(...years);
+const range = projects.length ? (from === to ? `${from}` : `${from}–${to}`) : '';
+const categories = new Set(projects.map((p) => p.category)).size;
+---
+
+<Base nav="work" image={projects[0]?.cover}>
+  <section class="wrap hero">
+    <p class="label"><span class="dot"></span>Portfolio {range}</p>
+    <h1 class="hero-title">{site.tagline ?? site.name}</h1>
+    <div class="hero-foot">
+      {site.intro && <p class="hero-intro">{site.intro}</p>}
+      <dl class="stats">
+        <div>
+          <dt class="label">Projekty</dt>
+          <dd>{pad(projects.length)}</dd>
+        </div>
+        <div>
+          <dt class="label">Práce</dt>
+          <dd>{pad(getAllImages(projects).length)}</dd>
+        </div>
+        <div>
+          <dt class="label">Kategorie</dt>
+          <dd>{pad(categories)}</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <Toolbar view="projects" tags={getTags(projects)} />
+
+  <section class="wrap" aria-label="Projekty">
+    <div class="cards">
+      {projects.map((project, i) => <ProjectCard project={project} eager={i < 3} />)}
+    </div>
+    <p class="empty" data-empty hidden={projects.length > 0}>
+      {projects.length ? 'Tomuhle filtru nic neodpovídá.' : 'Zatím tu nejsou žádné projekty.'}
+    </p>
+  </section>
+</Base>

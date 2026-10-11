@@ -1,0 +1,61 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../layouts/Base.astro';
+import Arrow from '../components/Arrow.astro';
+import { widthsFor } from '../lib/images';
+import { getSite } from '../lib/projects';
+
+const site = await getSite();
+const { Content } = await render(site.entry);
+const handle = (link: string) => link.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, '');
+
+const links = [
+  site.email && { label: 'E-mail', text: site.email, href: `mailto:${site.email}` },
+  site.instagram && { label: 'Instagram', text: handle(site.instagram), href: site.instagram },
+  site.behance && { label: 'Behance', text: handle(site.behance), href: site.behance },
+].filter((link) => !!link);
+---
+
+<Base title="O mně" nav="about">
+  <section class="wrap about">
+    {
+      site.portrait && (
+        <div class="about-media">
+          <Image
+            class="about-portrait"
+            src={site.portrait}
+            alt={site.name}
+            widths={widthsFor(site.portrait, [480, 800, 1200])}
+            sizes="(min-width: 900px) 40vw, 100vw"
+            format="webp"
+            loading="eager"
+          />
+        </div>
+      )
+    }
+    <div>
+      <p class="label"><span class="dot"></span>O mně</p>
+      <h1 class="about-title">{site.name}</h1>
+      {site.tagline && <p class="about-lead">{site.tagline}</p>}
+      <div class="prose">
+        <Content />
+      </div>
+      {
+        links.length > 0 && (
+          <ul class="links">
+            {links.map((link) => (
+              <li>
+                <a href={link.href} rel={link.href.startsWith('mailto:') ? undefined : 'me'}>
+                  <span class="label">{link.label}</span>
+                  <span>{link.text}</span>
+                  <Arrow />
+                </a>
+              </li>
+            ))}
+          </ul>
+        )
+      }
+    </div>
+  </section>
+</Base>

@@ -1,0 +1,46 @@
+---
+import Base from '../layouts/Base.astro';
+import Lightbox from '../components/Lightbox.astro';
+import Masonry from '../components/Masonry.astro';
+import Tile from '../components/Tile.astro';
+import Toolbar from '../components/Toolbar.astro';
+import { getAllImages, getProjects, getTags, plural } from '../lib/projects';
+
+const projects = await getProjects();
+const images = getAllImages(projects);
+---
+
+<Base title="Všechny práce" nav="work" image={projects[0]?.cover}>
+  <section class="wrap hero">
+    <p class="label"><span class="dot"></span>Archiv</p>
+    <h1 class="hero-title">Všechny práce</h1>
+    <div class="hero-foot">
+      <p class="hero-intro">
+        {plural(images.length, ['obrázek', 'obrázky', 'obrázků'])} ze všech projektů na jednom místě.
+      </p>
+    </div>
+  </section>
+
+  <Toolbar view="all" tags={getTags(projects)} />
+
+  <section class="wrap" aria-label="Všechny obrázky">
+    <Masonry>
+      {
+        images.map(({ image, alt, project }) => (
+          <Tile
+            image={image}
+            alt={alt}
+            project={project}
+            showProject
+            sizes="(min-width: 1530px) 20vw, (min-width: 1230px) 25vw, (min-width: 920px) 33vw, (min-width: 600px) 50vw, 100vw"
+          />
+        ))
+      }
+    </Masonry>
+    <p class="empty" data-empty hidden={images.length > 0}>
+      {images.length ? 'Tomuhle filtru nic neodpovídá.' : 'Zatím tu nejsou žádné práce.'}
+    </p>
+  </section>
+
+  <Lightbox />
+</Base>

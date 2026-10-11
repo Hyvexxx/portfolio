@@ -1,0 +1,120 @@
+---
+import { CATEGORIES, type Tag, url } from '../lib/projects';
+
+interface Props {
+  view: 'projects' | 'all';
+  tags: Tag[];
+}
+
+const { view, tags } = Astro.props;
+---
+
+<div class="toolbar">
+  <div class="wrap">
+    <div class="toolbar-inner">
+      <div class="toolbar-row">
+        <nav class="segmented" aria-label="Zobrazení">
+          <a href={url('/')} data-view-link aria-current={view === 'projects' ? 'page' : undefined}>
+            Projekty
+          </a>
+          <a href={url('/prace/')} data-view-link aria-current={view === 'all' ? 'page' : undefined}>
+            Všechny práce
+          </a>
+        </nav>
+        <div class="tabs" role="group" aria-label="Kategorie">
+          <button class="tab" type="button" data-filter="category" data-value="" aria-pressed="true">
+            Vše <span class="count" data-count></span>
+          </button>
+          {
+            Object.entries(CATEGORIES).map(([value, label]) => (
+              <button class="tab" type="button" data-filter="category" data-value={value} aria-pressed="false">
+                {label} <span class="count" data-count />
+              </button>
+            ))
+          }
+        </div>
+      </div>
+      {
+        tags.length > 0 && (
+          <div class="chips" role="group" aria-label="Tagy">
+            {tags.map((tag) => (
+              <button class="chip" type="button" data-filter="tag" data-value={tag.key} aria-pressed="false">
+                #{tag.label}
+              </button>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </div>
+</div>
+
+<script>
+  // Filtrování probíhá v prohlížeči: položky s [data-item] nesou
+  // data-category a data-tags, stav se ukládá do URL (?kategorie=…&tag=…).
+  type Key = 'category' | 'tag';
+  const PARAM: Record<Key, string> = { category: 'kategorie', tag: 'tag' };
+
+  const items = [...document.querySelectorAll<HTMLElement>('[data-item]')];
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')];
+  const viewLinks = document.querySelectorAll<HTMLAnchorElement>('[data-view-link]');
+  const empty = document.querySelector<HTMLElement>('[data-empty]');
+
+  const params = new URLSearchParams(location.search);
+  const state: Record<Key, string> = {
+    category: params.get(PARAM.category) ?? '',
+    tag: params.get(PARAM.tag) ?? '',
+  };
+
+  const tagsOf = (el: HTMLElement) => (el.dataset.tags ? el.dataset.tags.split('|') : []);
+  const matches = (el: HTMLElement, category: string, tag: string) =>
+    (!category || el.dataset.category === category) && (!tag || tagsOf(el).includes(tag));
+  const countFor = (category: string, tag: string) =>
+    items.filter((el) => matches(el, category, tag)).length;
+
+  function apply() {
+    let visible = 0;
+    for (const el of items) {
+      const ok = matches(el, state.category, state.tag);
+      el.hidden = !ok;
+      if (ok) visible++;
+    }
+
+    for (const chip of chips) {
+      const key = chip.dataset.filter as Key;
+      const value = chip.dataset.value ?? '';
+      chip.setAttribute('aria-pressed', String(state[key] === value));
+      if (key === 'category') {
+        const count = chip.querySelector('[data-count]');
+        if (count) count.textContent = String(countFor(value, state.tag));
+      } else {
+        // Tagy, které ve vybrané kategorii nic nemají, schováme.
+        chip.hidden = state.tag !== value && countFor(state.category, value) === 0;
+      }
+    }
+
+    if (empty) empty.hidden = visible > 0;
+
+    const query = new URLSearchParams();
+    if (state.category) query.set(PARAM.category, state.category);
+    if (state.tag) query.set(PARAM.tag, state.tag);
+    const search = query.size ? `?${query}` : '';
+    history.replaceState(history.state, '', `${location.pathname}${search}${location.hash}`);
+    viewLinks.forEach((a) => (a.search = search));
+  }
+
+  for (const chip of chips) {
+    chip.addEventListener('click', () => {
+      const key = chip.dataset.filter as Key;
+      const value = chip.dataset.value ?? '';
+      state[key] = key === 'tag' && state.tag === value ? '' : value;
+      // Aktivní tag, který v nové kategorii nic nemá, zrušíme.
+      if (key === 'category' && state.tag && countFor(state.category, state.tag) === 0) {
+        state.tag = '';
+      }
+      apply();
+    });
+  }
+
+  apply();
+</script>

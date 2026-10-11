@@ -1,0 +1,117 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Arrow from '../../components/Arrow.astro';
+import Lightbox from '../../components/Lightbox.astro';
+import Masonry from '../../components/Masonry.astro';
+import Tile from '../../components/Tile.astro';
+import { widthsFor } from '../../lib/images';
+import {
+  CATEGORIES,
+  getProjects,
+  pad,
+  projectUrl,
+  tagKey,
+  transitionName,
+  url,
+} from '../../lib/projects';
+
+export const getStaticPaths = (async () => {
+  const projects = await getProjects();
+  return projects.map((project, i) => ({
+    params: { slug: project.id },
+    // Další projekt dokola – za posledním následuje první.
+    props: { project, next: projects.length > 1 ? projects[(i + 1) % projects.length] : undefined },
+  }));
+}) satisfies GetStaticPaths;
+
+const { project, next } = Astro.props;
+const { Content } = await render(project.entry);
+const description = project.entry.body?.trim().split('\n')[0]?.slice(0, 160);
+---
+
+<Base title={project.title} description={description || undefined} nav="work" image={project.cover}>
+  <article class="wrap">
+    <a class="back" href={url('/')}><Arrow direction="left" /> Všechny projekty</a>
+
+    <header class="project-hero">
+      <p class="label"><span class="dot"></span>{CATEGORIES[project.category]} — {project.year}</p>
+      <h1 class="project-title">{project.title}</h1>
+    </header>
+
+    <div class="project-info">
+      <dl class="facts">
+        <div>
+          <dt class="label">Kategorie</dt>
+          <dd>{CATEGORIES[project.category]}</dd>
+        </div>
+        <div>
+          <dt class="label">Rok</dt>
+          <dd>{project.year}</dd>
+        </div>
+        <div>
+          <dt class="label">Obrázky</dt>
+          <dd>{pad(project.images.length)}</dd>
+        </div>
+        {
+          project.tags.length > 0 && (
+            <div class="facts-wide">
+              <dt class="label">Tagy</dt>
+              <dd class="tag-list">
+                {project.tags.map((tag) => (
+                  <a class="chip" href={`${url('/')}?tag=${encodeURIComponent(tagKey(tag))}`}>
+                    #{tag}
+                  </a>
+                ))}
+              </dd>
+            </div>
+          )
+        }
+      </dl>
+      <div class="prose">
+        <Content />
+      </div>
+    </div>
+
+    <Masonry large>
+      {
+        project.images.map((image, i) => (
+          <Tile
+            image={image}
+            alt={`${project.title} – ${i + 1}`}
+            project={project}
+            sizes="(min-width: 1290px) 33vw, (min-width: 850px) 50vw, 100vw"
+            transitionName={i === 0 ? transitionName(project) : undefined}
+          />
+        ))
+      }
+    </Masonry>
+
+    {
+      next && (
+        <a class="next-project" href={projectUrl(next)}>
+          <div>
+            <p class="label">Další projekt</p>
+            <p class="next-title">
+              {next.title} <Arrow direction="right" />
+            </p>
+          </div>
+          <div class="next-media">
+            <Image
+              src={next.cover}
+              alt=""
+              widths={widthsFor(next.cover, [300, 600])}
+              sizes="(min-width: 1400px) 280px, 20vw"
+              format="webp"
+              quality={80}
+            />
+          </div>
+        </a>
+      )
+    }
+  </article>
+
+  <Lightbox />
+</Base>

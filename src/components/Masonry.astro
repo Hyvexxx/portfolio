@@ -1,0 +1,37 @@
+---
+interface Props {
+  large?: boolean;
+}
+
+const { large = false } = Astro.props;
+---
+
+<div class:list={['masonry', { 'masonry--large': large }]} data-gallery data-masonry>
+  <slot />
+</div>
+
+<script>
+  // Bez JS jde o CSS sloupce (řazení shora dolů). S JS přepneme na grid
+  // s jemnými řádky: každá dlaždice zabere tolik řádků, kolik odpovídá jejímu
+  // poměru stran. Pořadí pak běží zleva doprava a nové práce jsou nahoře.
+  const ROW = 4;
+
+  for (const grid of document.querySelectorAll<HTMLElement>('[data-masonry]')) {
+    let lastWidth = 0;
+    const layout = () => {
+      const style = getComputedStyle(grid);
+      const column = parseFloat(style.gridTemplateColumns);
+      if (!column || column === lastWidth) return;
+      lastWidth = column;
+      const gap = parseFloat(style.columnGap) || 0;
+      for (const tile of grid.querySelectorAll<HTMLElement>('.tile')) {
+        const ratio = Number(tile.dataset.ratio) || 1;
+        tile.style.gridRowEnd = `span ${Math.ceil((column * ratio + gap) / ROW)}`;
+      }
+    };
+
+    grid.classList.add('is-grid');
+    layout();
+    new ResizeObserver(layout).observe(grid);
+  }
+</script>

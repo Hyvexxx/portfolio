@@ -1,0 +1,55 @@
+---
+// Připojí PhotoSwipe ke všem odkazům s data-pswp-width uvnitř [data-gallery].
+---
+
+<script>
+  import PhotoSwipeLightbox from 'photoswipe/lightbox';
+  import 'photoswipe/style.css';
+
+  const lightbox = new PhotoSwipeLightbox({
+    gallery: '[data-gallery]',
+    // Jen viditelné položky – lightbox respektuje aktivní filtry.
+    children: '[data-item]:not([hidden]) a[data-pswp-width]',
+    pswpModule: () => import('photoswipe'),
+    bgOpacity: 0.97,
+    padding: { top: 24, bottom: 72, left: 0, right: 0 },
+    wheelToZoom: false,
+    closeTitle: 'Zavřít',
+    zoomTitle: 'Přiblížit',
+    arrowPrevTitle: 'Předchozí',
+    arrowNextTitle: 'Další',
+    errorMsg: 'Obrázek se nepodařilo načíst.',
+    indexIndicatorSep: ' / ',
+  });
+
+  lightbox.on('uiRegister', () => {
+    lightbox.pswp?.ui?.registerElement({
+      name: 'caption',
+      order: 9,
+      isButton: false,
+      appendTo: 'root',
+      onInit: (el, pswp) => {
+        pswp.on('change', () => {
+          const link = pswp.currSlide?.data.element;
+          const title = link?.dataset.title;
+          const projectUrl = link?.dataset.projectUrl;
+          el.replaceChildren();
+          el.hidden = !title;
+          if (!title) return;
+
+          const name = document.createElement('strong');
+          name.textContent = title;
+          el.append(name);
+          if (projectUrl) {
+            const more = document.createElement('a');
+            more.href = projectUrl;
+            more.textContent = 'Zobrazit projekt →';
+            el.append(more);
+          }
+        });
+      },
+    });
+  });
+
+  lightbox.init();
+</script>

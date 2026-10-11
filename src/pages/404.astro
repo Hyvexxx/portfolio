@@ -1,0 +1,14 @@
+---
+import Base from '../layouts/Base.astro';
+import Arrow from '../components/Arrow.astro';
+import { url } from '../lib/projects';
+---
+
+<Base title="Stránka nenalezena">
+  <section class="wrap not-found">
+    <p class="label"><span class="dot"></span>Chyba 404</p>
+    <h1>Tady nic není.</h1>
+    <p>Stránka mohla být přesunuta nebo smazána.</p>
+    <a class="btn" href={url('/')}>Zpět na práce <Arrow direction="right" /></a>
+  </section>
+</Base>

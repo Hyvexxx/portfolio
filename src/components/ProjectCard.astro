@@ -1,0 +1,51 @@
+---
+import { Image } from 'astro:assets';
+import Arrow from './Arrow.astro';
+import { widthsFor } from '../lib/images';
+import {
+  CATEGORIES,
+  plural,
+  projectUrl,
+  tagKey,
+  transitionName,
+  type Project,
+} from '../lib/projects';
+
+interface Props {
+  project: Project;
+  eager?: boolean;
+}
+
+const { project, eager = false } = Astro.props;
+---
+
+<a
+  class="card"
+  href={projectUrl(project)}
+  data-item
+  data-category={project.category}
+  data-tags={project.tags.map(tagKey).join('|')}
+>
+  <div class="card-media" style={`view-transition-name: ${transitionName(project)}`}>
+    <Image
+      src={project.cover}
+      alt={project.title}
+      widths={widthsFor(project.cover, [480, 800, 1200])}
+      sizes="(min-width: 1480px) 25vw, (min-width: 1110px) 33vw, (min-width: 740px) 50vw, 100vw"
+      format="webp"
+      quality={80}
+      loading={eager ? 'eager' : 'lazy'}
+      fetchpriority={eager ? 'high' : 'auto'}
+    />
+    <span class="card-badge">{plural(project.images.length, ['obrázek', 'obrázky', 'obrázků'])}</span>
+    <span class="card-arrow" aria-hidden="true"><Arrow /></span>
+  </div>
+  <div class="card-head">
+    <h2 class="card-title">{project.title}</h2>
+    <span class="card-year">{project.year}</span>
+  </div>
+  <p class="card-meta">
+    {CATEGORIES[project.category]}
+    {project.tags.length > 0 && ` — ${project.tags.join(', ')}`}
+  </p>
+</a>

@@ -1,0 +1,127 @@
+# Konfigurace Pages CMS (https://pagescms.org) – webového adminu portfolia.
+media:
+  input: src/assets
+  output: /src/assets
+  categories: [image]
+  extensions: [jpg, jpeg, png, webp, avif]
+  rename: safe
+
+content:
+  - name: projects
+    label: Projekty
+    description: Každý projekt je skupina fotek nebo grafik s hlavní fotkou a názvem.
+    type: collection
+    path: src/content/projects
+    format: yaml-frontmatter
+    filename: "{primary}.md"
+    view:
+      fields: [title, category, date, draft]
+      primary: title
+      sort: [date, title]
+      search: [title, tags]
+      default:
+        sort: date
+        order: desc
+    fields:
+      - name: title
+        label: Název projektu
+        type: string
+        required: true
+      - name: category
+        label: Kategorie
+        type: select
+        required: true
+        default: foto
+        options:
+          values:
+            - name: foto
+              label: Fotografie
+            - name: grafika
+              label: Grafika
+      - name: date
+        label: Datum
+        description: Podle data se projekty řadí (nejnovější první).
+        type: date
+        required: true
+        options:
+          format: yyyy-MM-dd
+      - name: tags
+        label: Tagy
+        description: Např. svatba, portrét, logo. Podle tagů jde na webu filtrovat.
+        type: string
+        list: true
+      - name: cover
+        label: Hlavní fotka
+        description: Reprezentativní obrázek – zobrazí se na kartě projektu. Fotky každého projektu dávej do vlastní složky.
+        type: image
+        required: true
+        options:
+          path: src/assets/projects
+      - name: gallery
+        label: Galerie
+        description: Všechny fotky / grafiky projektu. Můžeš vybrat víc najednou, pořadí jde měnit přetažením.
+        type: image
+        options:
+          path: src/assets/projects
+          multiple: true
+          unique: true
+      - name: featured
+        label: Zvýraznit
+        description: Zvýrazněné projekty jsou na webu vždy první.
+        type: boolean
+        default: false
+      - name: draft
+        label: Koncept
+        description: Koncept se na webu nezobrazí.
+        type: boolean
+        default: false
+      - name: body
+        label: Popis
+        type: rich-text
+        options:
+          format: markdown
+          media: false
+
+  - name: about
+    label: O mně
+    type: file
+    path: src/content/site/about.md
+    format: yaml-frontmatter
+    fields:
+      - name: name
+        label: Jméno
+        description: Zobrazuje se v hlavičce webu.
+        type: string
+        required: true
+      - name: tagline
+        label: Podtitul
+        description: Velký nadpis na úvodní stránce.
+        type: string
+      - name: intro
+        label: Krátké představení
+        description: Jedna dvě věty pod nadpisem na úvodní stránce.
+        type: text
+      - name: cta
+        label: Výzva v patičce
+        description: Např. „Máte projekt? Pojďme ho spolu vytvořit.“
+        type: string
+      - name: email
+        label: E-mail
+        type: string
+      - name: instagram
+        label: Instagram (celý odkaz)
+        type: string
+      - name: behance
+        label: Behance (celý odkaz)
+        type: string
+      - name: portrait
+        label: Portrét
+        type: image
+        options:
+          path: src/assets/site
+      - name: body
+        label: Text o mně
+        type: rich-text
+        options:
+          format: markdown
+          media: false
